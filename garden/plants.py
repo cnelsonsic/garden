@@ -2,6 +2,7 @@
 import random
 from random import randint, choice
 
+from names import plant
 from resources.colors import COLORS
 
 SHAPES = ("bush", "tree", "shrub")
@@ -14,16 +15,21 @@ class Plant(object):
     '''
     >>> p = Plant(seed=1234)
     >>> p.description()
-    'This shrub is roughly 90 cm tall by 4 cm wide. It has triangular-shaped leaves, 3 cm wide by 3 cm long. The plant takes 56 days to reach maturity and begin flowering. It produces burlywood colored blooms, with a rotten aroma. After flowering, it produces hard fruit that is 1 cm wide by 8 cm long. In a growing season, it can produce anywhere from 4 to 7 fruit. The fruit takes 11 days to ripen fully from the day the bud first forms. Its seeds are roughly 1.9 cm wide by 1.2 cm long. They take 1 days to germinate.'
+    'This tree is roughly 136 cm tall by 12 cm wide. It has oval-shaped leaves, 1 cm wide by 4 cm long. The plant takes 50 days to reach maturity and begin flowering. It produces gray colored blooms, with a pungeant aroma. After flowering, it produces tangy fruit that is 2 cm wide by 2 cm long. In a growing season, it can produce anywhere from 1 to 5 fruit. The fruit takes 4 days to ripen fully from the day the bud first forms. Its seeds are roughly 0.7 cm wide by 5.5 cm long. They take 14 days to germinate.'
     >>> p = Plant(seed=1)
     >>> p.description()
-    'This bush is roughly 170 cm tall by 78 cm wide. It has needle-shaped leaves, 2 cm wide by 3 cm long. The plant takes 25 days to reach maturity and begin flowering. It produces plum colored blooms, with a pleasant aroma. After flowering, it produces firm fruit that is 9 cm wide by 5 cm long. In a growing season, it can produce anywhere from 1 to 4 fruit. The fruit takes 23 days to ripen fully from the day the bud first forms. Its seeds are roughly 2.3 cm wide by 9.5 cm long. They take 28 days to germinate.'
+    'This bush is roughly 101 cm tall by 47 cm wide. It has triangular-shaped leaves, 1 cm wide by 1 cm long. The plant takes 44 days to reach maturity and begin flowering. It produces saddle brown colored blooms, with a pungeant aroma. After flowering, it produces poisonous fruit that is 1 cm wide by 5 cm long. In a growing season, it can produce anywhere from 2 to 15 fruit. The fruit takes 22 days to ripen fully from the day the bud first forms. Its seeds are roughly 0.4 cm wide by 0.3 cm long. They take 17 days to germinate.'
     '''
 
-    def __init__(self, seed=None):
+    def __init__(self, name=None, seed=None):
         if seed:
             self.seed = seed
             random.seed(seed)
+
+        if name:
+            self.name = name
+        else:
+            self.name = plant(seed)
 
         self.plant_shape = choice(SHAPES)
         self.plant_height = randint(4, 200)

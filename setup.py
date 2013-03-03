@@ -10,6 +10,7 @@ setup(name='Garden',
 
       packages=find_packages(),
 
+      setup_requires = ['nose==1.2.1'],
       install_requires = open('requirements.txt').read(),
 
       entry_points = {

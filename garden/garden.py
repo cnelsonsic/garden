@@ -6,6 +6,7 @@ import urwid
 from plants import Plant
 from names import random_name
 from player import Player
+from store import Store
 
 
 class InputBox(urwid.Pile):
@@ -47,6 +48,7 @@ class Garden(object):
 
     def __init__(self):
         self.player = Player()
+        self.store = Store()
         self.objects = []
 
         # A simple log of things that have happened.
@@ -57,7 +59,12 @@ class Garden(object):
 
     def tick(self):
         self.add_log("* A day passes.")
-        pass
+
+        self.player.tick()
+        for obj in self.objects:
+            log = obj.tick()
+            if log:
+                self.add_log(log)
 
     @command
     def hi(self, *args):
@@ -67,10 +74,39 @@ class Garden(object):
     def help(self):
         self.add_log("Available commands:")
         self.add_log(", ".join(COMMANDS))
-    
+
     @command
     def quit(self):
         raise urwid.ExitMainLoop()
+
+    @command
+    def shop(self, itemname=None):
+        inventory = self.store.get_inventory()
+        if not itemname:
+            self.add_log("* You flip through your handy-dandy store catalog.")
+            for item in inventory:
+                if item.value <= (self.player.money*3):
+                    self.add_log(u" {0}: {1} {2}".format(self.format_object(item), item.value, self.player.currency))
+        else:
+            for item in inventory:
+                if item.name.lower() == itemname.lower():
+                    self.add_log(item.description())
+
+    @command
+    def buy(self, itemname, number=1):
+        inventory = self.store.get_inventory()
+        for item in inventory:
+            if item.name.lower() == itemname.lower():
+                cost = (item.value * number)
+                if (cost) > self.player.money:
+                    self.add_log("Not enough {0} to buy that.".format(self.player.currency))
+                else:
+                    self.add_log("* You buy {0} {1} for {2} {3}".format(number, itemname, cost, self.player.currency))
+                    self.player.money -= cost
+                    self.objects.extend([item]*number)
+                return
+        else:
+            self.add_log("No such item in the store.")
 
     def add_log(self, value):
         if isinstance(value, basestring):
@@ -79,20 +115,23 @@ class Garden(object):
         for item in value:
             self.log.contents.append((urwid.Text(item.strip()), ('pack', None)))
 
+    def format_object(self, obj):
+        if type(obj) == Plant:
+            symbol = u"⚘"
+        # elif type(obj) == Animal:
+            # symbol = u"♘"
+        return(symbol+" "+obj.name)
+
     def format_objects(self):
         '''Format the objects list for printing to the screen.'''
         retval = []
         for obj in self.objects:
-            if type(obj) == Plant:
-                symbol = u"⚘"
-            # elif type(obj) == Animal:
-                # symbol = u"♘"
-            retval.append(symbol+" "+obj.name)
+            retval.append(self.format_object(obj))
         return retval
 
     def add_money(self, amount):
         self.player.money += amount
-        self.add_log("* You got {0} money.".format(amount))
+        self.add_log("* You got {0} {1}.".format(amount, self.player.currency))
 
     def intro(self):
         intro = '''Long ago in a realm known as {world_name},

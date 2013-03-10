@@ -31,6 +31,11 @@ class Plant(object):
         else:
             self.name = plant(seed)
 
+        # Game values
+        self.value = 0
+        self.ticks = 0
+
+        # Descriptive values
         self.plant_shape = choice(SHAPES)
         self.plant_height = randint(4, 200)
         self.plant_width = randint(4, 100)
@@ -76,3 +81,6 @@ class Plant(object):
                 "by {seed_length} cm long. "
                 "They take {seed_days} days to germinate."
                 ).format(**self.__dict__)
+
+    def tick(self):
+        self.ticks += 1

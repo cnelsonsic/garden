@@ -21,11 +21,19 @@ class InputBox(urwid.Pile):
         if value:
             funcname = value.split()[0]
 
-            if hasattr(self.garden, funcname):
+            if hasattr(self.garden, funcname) and funcname in COMMANDS:
                 # Call the relevant function and blank our editbox.
                 self.edit.edit_text = ""
                 getattr(self.garden, funcname)(*value.split()[1:])
+            else:
+                self.garden.add_log("Syntax Error: "+funcname)
         self.garden.tick() # Tick after every command
+
+COMMANDS = []
+def command(func):
+    global COMMANDS
+    COMMANDS.append(func.__name__)
+    return func
 
 
 class Garden(object):
@@ -36,6 +44,7 @@ class Garden(object):
     >>> g.format_objects()
     [u'\u2698 Qux']
     '''
+
     def __init__(self):
         self.player = Player()
         self.objects = []
@@ -50,8 +59,18 @@ class Garden(object):
         self.add_log("* A day passes.")
         pass
 
+    @command
     def hi(self, *args):
         self.add_log("* You say hi {args}!".format(args=args))
+
+    @command
+    def help(self):
+        self.add_log("Available commands:")
+        self.add_log(", ".join(COMMANDS))
+    
+    @command
+    def quit(self):
+        raise urwid.ExitMainLoop()
 
     def add_log(self, value):
         if isinstance(value, basestring):

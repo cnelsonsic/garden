@@ -20,10 +20,10 @@ class InputBox(urwid.Pile):
         value = self.edit.edit_text
         if value:
             funcname = value.split()[0]
+            self.edit.edit_text = ""
 
             if hasattr(self.garden, funcname) and funcname in COMMANDS:
                 # Call the relevant function and blank our editbox.
-                self.edit.edit_text = ""
                 getattr(self.garden, funcname)(*value.split()[1:])
             else:
                 self.garden.add_log("Syntax Error: "+funcname)

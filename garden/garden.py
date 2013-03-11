@@ -3,6 +3,8 @@
 
 import urwid
 
+from copy import deepcopy
+
 from plants import Plant
 from names import random_name
 from player import Player
@@ -80,6 +82,10 @@ class Garden(object):
         raise urwid.ExitMainLoop()
 
     @command
+    def q(self):
+        self.quit()
+
+    @command
     def shop(self, itemname=None):
         inventory = self.store.get_inventory()
         if not itemname:
@@ -103,7 +109,7 @@ class Garden(object):
                 else:
                     self.add_log("* You buy {0} {1} for {2} {3}".format(number, itemname, cost, self.player.currency))
                     self.player.money -= cost
-                    self.objects.extend([item]*number)
+                    self.objects.extend([deepcopy(item)]*number)
                 return
         else:
             self.add_log("No such item in the store.")
@@ -112,6 +118,7 @@ class Garden(object):
         if isinstance(value, basestring):
             value = [value]
 
+        self.log.contents = self.log.contents[-40:]
         for item in value:
             self.log.contents.append((urwid.Text(item.strip()), ('pack', None)))
 
@@ -145,7 +152,7 @@ class Garden(object):
         That's pretty much it.
         Here's some money.'''.format(world_name=random_name())
         self.add_log(intro.split("\n"))
-        self.add_money(10)
+        self.add_money(100)
 
 
 def main():

@@ -1,6 +1,8 @@
 '''A module for randomly generating plants.'''
 import random
 from random import randint, choice
+import inflect
+p = inflect.engine()
 
 from names import plant
 from resources.colors import COLORS
@@ -54,6 +56,7 @@ class Plant(object):
         self.fruit_days = randint(1, 30)
         self.fruit_min = randint(1, 5)
         self.fruit_max = randint(self.fruit_min, self.fruit_min*randint(2, 8))
+        self.num_fruit = 0
 
         self.seed_width = randint(1, 100)/10.0
         self.seed_length = randint(1, 100)/10.0
@@ -84,3 +87,10 @@ class Plant(object):
 
     def tick(self):
         self.ticks += 1
+        if self.ticks == self.seed_days:
+            return "One of your {0} {1} has sprouted!".format(self.name, p.plural(self.plant_shape))
+        elif self.ticks == self.plant_days:
+            return "One of your {0} {1} has begun putting out buds!".format(self.name, p.plural(self.plant_shape))
+        elif self.ticks % (self.plant_days + self.fruit_days) == 0:
+            self.num_fruit += randint(self.fruit_min, self.fruit_max)
+            return "One of your {0} {1} has produced {2} fruit!".format(self.name, p.plural(self.plant_shape), self.num_fruit)

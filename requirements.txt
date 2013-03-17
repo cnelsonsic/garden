@@ -1,6 +1,5 @@
 argparse==1.2.1
 nose==1.2.1
 wsgiref==0.1.2
-urwid==1.1.1
 coverage==3.6
 inflect==0.2.3

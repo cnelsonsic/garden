@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #coding: utf-8
 
-import urwid
+from cmd import Cmd
 
 from copy import deepcopy
 
@@ -11,53 +11,28 @@ from player import Player
 from store import Store
 
 
-class InputBox(urwid.Pile):
-    def __init__(self, garden):
-        self.edit = urwid.Edit(caption="> ")
-        super(InputBox, self).__init__([self.edit])
-        self.garden = garden
-
-    def keypress(self, size, key):
-        if key != 'enter':
-            return super(InputBox, self).keypress(size, key)
-        value = self.edit.edit_text
-        if value:
-            funcname = value.split()[0]
-            self.edit.edit_text = ""
-
-            if hasattr(self.garden, funcname) and funcname in COMMANDS:
-                # Call the relevant function and blank our editbox.
-                getattr(self.garden, funcname)(*value.split()[1:])
-            else:
-                self.garden.add_log("Syntax Error: "+funcname)
-        self.garden.tick() # Tick after every command
-
-COMMANDS = []
-def command(func):
-    global COMMANDS
-    COMMANDS.append(func.__name__)
-    return func
-
-
-class Garden(object):
-    '''
-    >>> p = Plant(seed=34)
-    >>> g = Garden()
-    >>> g.objects.append(p)
-    >>> g.format_objects()
-    [u'\u2698 Qux']
-    '''
+class App(Cmd):
+    prompt = "> "
 
     def __init__(self):
+        Cmd.__init__(self)
+
         self.player = Player()
         self.store = Store()
         self.objects = []
 
-        # A simple log of things that have happened.
-        self.log = urwid.Pile([])
-        self.top = urwid.Frame(body=urwid.Pile([self.log]), footer=InputBox(garden=self), focus_part='footer')
+        self._do_intro()
 
-        self.intro()
+    def emptyline(self):
+        pass
+
+    def default(self, line):
+        self.add_log("Arglebargle, glop-glyf?")
+
+    def postcmd(self, stop, line):
+        self.tick()
+        Cmd.postcmd(self, stop, line)
+        return False
 
     def tick(self):
         self.add_log("* A day passes.")
@@ -68,38 +43,23 @@ class Garden(object):
             if log:
                 self.add_log(log)
 
-    @command
-    def hi(self, *args):
-        self.add_log("* You say hi {args}!".format(args=args))
-
-    @command
-    def help(self):
-        self.add_log("Available commands:")
-        self.add_log(", ".join(COMMANDS))
-
-    @command
-    def quit(self):
-        raise urwid.ExitMainLoop()
-
-    @command
-    def q(self):
-        self.quit()
-
-    @command
-    def shop(self, itemname=None):
+    def do_shop(self, itemname=None):
         inventory = self.store.get_inventory()
         if not itemname:
             self.add_log("* You flip through your handy-dandy store catalog.")
             for item in inventory:
-                if item.value <= (self.player.money*3):
+                if item.value <= (self.player.money*3): # TODO: Make this the total worth of the garden instead.
                     self.add_log(u" {0}: {1} {2}".format(self.format_object(item), item.value, self.player.currency))
         else:
             for item in inventory:
                 if item.name.lower() == itemname.lower():
                     self.add_log(item.description())
 
-    @command
-    def buy(self, itemname, number=1):
+    def do_buy(self, itemname, number=1):
+        if not itemname:
+            self.add_log("Please specify the name of an item to buy.")
+            return
+
         inventory = self.store.get_inventory()
         for item in inventory:
             if item.name.lower() == itemname.lower():
@@ -118,9 +78,8 @@ class Garden(object):
         if isinstance(value, basestring):
             value = [value]
 
-        self.log.contents = self.log.contents[-40:]
         for item in value:
-            self.log.contents.append((urwid.Text(item.strip()), ('pack', None)))
+            self.stdout.write(item.strip()+"\n")
 
     def format_object(self, obj):
         if type(obj) == Plant:
@@ -140,7 +99,7 @@ class Garden(object):
         self.player.money += amount
         self.add_log("* You got {0} {1}.".format(amount, self.player.currency))
 
-    def intro(self):
+    def _do_intro(self):
         intro = '''Long ago in a realm known as {world_name},
         you were granted a plot of land.
         You were told to go forth and populate it with plants and animals.
@@ -156,8 +115,8 @@ class Garden(object):
 
 
 def main():
-    garden = Garden()
-    urwid.MainLoop(garden.top).run()
+    app = App()
+    app.cmdloop()
 
 if __name__ == "__main__":
     main()

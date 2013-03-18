@@ -7,6 +7,7 @@ class Player(object):
         self.currency = random.choice(CURRENCIES)
         self.money = 0
         self.ticks = 0
+        self.inventory = [] # The player's inventory contents
 
     def tick(self):
         self.ticks += 1

@@ -1,4 +1,5 @@
 '''A module for randomly generating plants.'''
+#coding: utf-8
 import random
 from random import randint, choice
 import inflect
@@ -83,6 +84,14 @@ class Plant(object):
                 "Its seeds are roughly {seed_width} cm wide "
                 "by {seed_length} cm long. "
                 "They take {seed_days} days to germinate."
+                ).format(**self.__dict__)
+
+    def short_description(self):
+        '''Return a very short description suitable for at-a-glance display.'''
+        return (u"⚘ "
+                u"{name}: "
+                u"{ticks} days old, "
+                u"{num_fruit} fruit."
                 ).format(**self.__dict__)
 
     def tick(self):

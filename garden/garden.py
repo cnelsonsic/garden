@@ -19,7 +19,7 @@ class App(Cmd):
 
         self.player = Player()
         self.store = Store()
-        self.objects = []
+        self.objects = [] # All objects in the garden.
 
         self._do_intro()
 
@@ -74,6 +74,21 @@ class App(Cmd):
         else:
             self.add_log("No such item in the store.")
 
+    def do_inspect(self, arg):
+        '''Inspect a specific item to see all its details.'''
+        pass
+
+    def do_examine(self, arg):
+        '''Examine all the objects in your garden to see some details.'''
+        return self.do_look("hard")
+
+    def do_look(self, arg):
+        '''Look around your garden to see the general inventory.'''
+        self.add_log("* You look around your garden, you see:")
+        self.add_log("="*30)
+        self.add_log(self.format_objects(detail=True) or "Nothing but barren dirt.")
+        self.add_log("="*30)
+
     def add_log(self, value):
         if isinstance(value, basestring):
             value = [value]
@@ -88,11 +103,21 @@ class App(Cmd):
             # symbol = u"♘"
         return(symbol+" "+obj.name)
 
-    def format_objects(self):
+    def format_objects(self, detail=False):
         '''Format the objects list for printing to the screen.'''
-        retval = []
+        objects = []
         for obj in self.objects:
-            retval.append(self.format_object(obj))
+            objects.append(self.format_object(obj))
+
+        if not detail:
+            counts = {} # {name: count}
+            for obj in sorted(objects):
+                counts[obj] = counts.get(obj, 0)+1
+
+            retval = [u"{0} x{1}".format(name, count) for (name, count) in counts.iteritems()]
+        else:
+            retval = [obj.short_description() for obj in self.objects]
+
         return retval
 
     def add_money(self, amount):

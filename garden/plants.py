@@ -88,10 +88,17 @@ class Plant(object):
 
     def short_description(self):
         '''Return a very short description suitable for at-a-glance display.'''
+        # symbol = u"♘"
         return (u"⚘ "
                 u"{name}: "
                 u"{ticks} days old, "
                 u"{num_fruit} fruit."
+                ).format(**self.__dict__)
+
+    def fancy_name(self):
+        '''Return a fancy name.'''
+        return (u"⚘ "
+                u"{name}"
                 ).format(**self.__dict__)
 
     def tick(self):

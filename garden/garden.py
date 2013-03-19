@@ -44,18 +44,21 @@ class App(Cmd):
                 self.add_log(log)
 
     def do_shop(self, itemname=None):
+        '''Show a list of items available for purchase.'''
         inventory = self.store.get_inventory()
         if not itemname:
             self.add_log("* You flip through your handy-dandy store catalog.")
+            self.add_log("* (You have {0} {1})".format(self.player.money, self.player.currency))
             for item in inventory:
                 if item.value <= (self.player.money*3): # TODO: Make this the total worth of the garden instead.
-                    self.add_log(u" {0}: {1} {2}".format(self.format_object(item), item.value, self.player.currency))
+                    self.add_log(u" {0}: {1} {2}".format(item.fancy_name(), item.value, self.player.currency))
         else:
             for item in inventory:
                 if item.name.lower() == itemname.lower():
                     self.add_log(item.description())
 
     def do_buy(self, itemname, number=1):
+        '''Buy a specific item, or a number of items.'''
         if not itemname:
             self.add_log("Please specify the name of an item to buy.")
             return
@@ -78,16 +81,28 @@ class App(Cmd):
         '''Inspect a specific item to see all its details.'''
         pass
 
-    def do_examine(self, arg):
-        '''Examine all the objects in your garden to see some details.'''
-        return self.do_look("hard")
-
     def do_look(self, arg):
         '''Look around your garden to see the general inventory.'''
         self.add_log("* You look around your garden, you see:")
         self.add_log("="*30)
-        self.add_log(self.format_objects(detail=True) or "Nothing but barren dirt.")
+        self.add_log(self.format_objects() or "Nothing but barren dirt.")
         self.add_log("="*30)
+
+    def do_gather(self, arg):
+        wasfruit = False
+        for obj in self.objects:
+            if obj.num_fruit:
+                wasfruit = True
+                self.player.inventory.extend(["{0} Fruit".format(obj.name)]*obj.num_fruit)
+                self.add_log("* You gather {num_fruit} fruit from one of your {name} {plant_shape}s".format(**obj.__dict__))
+                obj.num_fruit = 0
+
+        if not wasfruit:
+            self.add_log("There's no fruit to gather...")
+            return
+
+        self.add_log("* Your inventory is now:")
+        self.add_log(self.player.inventory)
 
     def add_log(self, value):
         if isinstance(value, basestring):
@@ -96,29 +111,9 @@ class App(Cmd):
         for item in value:
             self.stdout.write(item.strip()+"\n")
 
-    def format_object(self, obj):
-        if type(obj) == Plant:
-            symbol = u"⚘"
-        # elif type(obj) == Animal:
-            # symbol = u"♘"
-        return(symbol+" "+obj.name)
-
-    def format_objects(self, detail=False):
+    def format_objects(self):
         '''Format the objects list for printing to the screen.'''
-        objects = []
-        for obj in self.objects:
-            objects.append(self.format_object(obj))
-
-        if not detail:
-            counts = {} # {name: count}
-            for obj in sorted(objects):
-                counts[obj] = counts.get(obj, 0)+1
-
-            retval = [u"{0} x{1}".format(name, count) for (name, count) in counts.iteritems()]
-        else:
-            retval = [obj.short_description() for obj in self.objects]
-
-        return retval
+        return [obj.short_description() for obj in self.objects]
 
     def add_money(self, amount):
         self.player.money += amount

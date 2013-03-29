@@ -121,7 +121,7 @@ class App(Cmd, Saveable):
         for obj in self.objects:
             if obj.num_fruit:
                 wasfruit = True
-                self.player.inventory.extend(["{0} Fruit".format(obj.name)]*obj.num_fruit)
+                self.player.inventory.extend([Item("{0} Fruit".format(obj.name), value=obj.value/10)]*obj.num_fruit)
                 self.add_log("* You gather {num_fruit} fruit from one of your {name} {plant_shape}s".format(**obj.__dict__))
                 obj.num_fruit = 0
 
@@ -132,12 +132,26 @@ class App(Cmd, Saveable):
         self.add_log("* Your inventory is now:")
         self.add_log(self.player.inventory)
 
+    def do_sell(self, arg):
+        if not arg:
+            self.add_log("* You open your pack")
+            for item in self.player.inventory:
+                self.add_log(("{item.name}: "
+                              "{item.value} "
+                              "{money}").format(item=item,
+                                                money=self.player.currency))
+        else:
+            for item in self.player.inventory:
+                if arg.lower() in item.name.lower():
+                    self.player.money += item.value
+                    self.add_log("* You sell {item.name} for {item.value}.".format(item=item))
+
     def add_log(self, value):
         if isinstance(value, basestring):
             value = [value]
 
         for item in value:
-            self.stdout.write(item.strip()+"\n")
+            self.stdout.write(unicode(item).strip()+"\n")
 
     def format_objects(self):
         '''Format the objects list for printing to the screen.'''

@@ -7,6 +7,8 @@ p = inflect.engine()
 
 from names import plant
 from resources.colors import COLORS
+from items import Item
+from savegame import Saveable
 
 SHAPES = ("bush", "tree", "shrub")
 LEAVES = ("oval", "needle", "triangular")
@@ -14,7 +16,7 @@ FRUITS = ("firm", "juicy", "hard", "soft", "dry", "tangy", "poisonous",
           "savory", "sweet")
 SMELLS = ("pleasant", "pungeant", "rotten")
 
-class Plant(object):
+class Plant(Saveable):
     '''
     >>> p = Plant(seed=1234)
     >>> p.description()

@@ -1,8 +1,9 @@
 import random
 
 from resources.currencies import CURRENCIES
+from savegame import Saveable
 
-class Player(object):
+class Player(Saveable):
     def __init__(self):
         self.currency = random.choice(CURRENCIES)
         self.money = 0

@@ -1,8 +1,9 @@
 import random
 
 from plants import Plant
+from savegame import Saveable
 
-class Store(object):
+class Store(Saveable):
     '''Handles all the buying and selling.'''
     def __init__(self):
         self._inventory = []

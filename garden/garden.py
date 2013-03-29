@@ -9,9 +9,11 @@ from plants import Plant
 from names import random_name
 from player import Player
 from store import Store
+from items import Item
+from savegame import Saveable
 
 
-class App(Cmd):
+class App(Cmd, Saveable):
     prompt = "> "
 
     def __init__(self):
@@ -42,6 +44,32 @@ class App(Cmd):
             log = obj.tick()
             if log:
                 self.add_log(log)
+
+    def do_save(self, arg):
+        # temporarily remove stdout/stdin for pickling
+        stdout = self.stdout
+        stdin = self.stdin
+        self.stdout = None
+        self.stdin = None
+
+        self.save()
+
+        # reattach stdout/stdin
+        self.stdout = stdout
+        self.stdin = stdin
+
+    def do_load(self, arg):
+        # temporarily remove stdout/stdin for pickling
+        stdout = self.stdout
+        stdin = self.stdin
+        self.stdout = None
+        self.stdin = None
+
+        self.load()
+
+        # reattach stdout/stdin
+        self.stdout = stdout
+        self.stdin = stdin
 
     def do_shop(self, itemname=None):
         '''Show a list of items available for purchase.'''

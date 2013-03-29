@@ -46,6 +46,7 @@ class App(Cmd, Saveable):
                 self.add_log(log)
 
     def do_save(self, arg):
+        '''Save your game.'''
         # temporarily remove stdout/stdin for pickling
         stdout = self.stdout
         stdin = self.stdin
@@ -59,6 +60,7 @@ class App(Cmd, Saveable):
         self.stdin = stdin
 
     def do_load(self, arg):
+        '''Load your game.'''
         # temporarily remove stdout/stdin for pickling
         stdout = self.stdout
         stdin = self.stdin
@@ -117,6 +119,7 @@ class App(Cmd, Saveable):
         self.add_log("="*30)
 
     def do_gather(self, arg):
+        '''Gather all the fruit from your plants. for sale or planting.'''
         wasfruit = False
         for obj in self.objects:
             if obj.num_fruit:
@@ -133,6 +136,7 @@ class App(Cmd, Saveable):
         self.add_log(self.player.inventory)
 
     def do_sell(self, arg):
+        '''List salable items or sell a specific item.'''
         if not arg:
             self.add_log("* You open your pack")
             for item in self.player.inventory:
@@ -141,10 +145,12 @@ class App(Cmd, Saveable):
                               "{money}").format(item=item,
                                                 money=self.player.currency))
         else:
-            for item in self.player.inventory:
+            for item in self.player.inventory[:]:
                 if arg.lower() in item.name.lower():
                     self.player.money += item.value
+                    self.player.inventory.remove(item)
                     self.add_log("* You sell {item.name} for {item.value}.".format(item=item))
+                    break
 
     def add_log(self, value):
         if isinstance(value, basestring):
